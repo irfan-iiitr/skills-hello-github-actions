@@ -1,0 +1,25 @@
+name: Post Commit Comment
+
+on:
+  pull_request:
+    types:  [closed]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  build:
+    name: Post Commit Comment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if PR is closed and merged
+        id: check_pr
+        run: echo ::set-output name=merged::$(echo ${{ github.event.pull_request.merged }})
+
+      - name: Add congratulations comment
+        if: steps.check_pr.outputs.merged == 'true'
+        run: gh pr comment $PR_URL --body "Congratulations on merging this pull request!"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
